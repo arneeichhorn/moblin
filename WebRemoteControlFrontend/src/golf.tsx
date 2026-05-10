@@ -8,7 +8,7 @@ import {
   confirmOk,
   confirmCancel,
 } from "./utils.ts";
-import { BasicLinks, ConfirmDialog } from "./components.tsx";
+import { BasicLinks, ConfirmDialog, ConnectionBadge, Section } from "./components.tsx";
 
 interface Player {
   name: string;
@@ -250,31 +250,32 @@ function App() {
       .sort((entryA, entryB) => entryA.total - entryB.total);
   };
 
-  function ConnectionStatus() {
+  const isConnected = () => status() === connectionStatus.connected;
+
+  function ConnectionRow() {
     return (
-      <div class="pb-1 text-center text-sm">
-        <Switch fallback={<span class="text-red-500">Unknown server status</span>}>
-          <Match when={status() === connectionStatus.connecting}>
-            <span class="text-yellow-400">Connecting to server</span>
-          </Match>
-          <Match when={status() === connectionStatus.connected}>
-            <span class="text-green-500">Connected to server</span>
-          </Match>
-        </Switch>
-      </div>
+      <Switch fallback={<ConnectionBadge connected={isConnected} />}>
+        <Match when={status() !== connectionStatus.connecting && !isConnected()}>
+          <div class="text-center pb-1">
+            <span class="badge badge-sm badge-error">Unknown server status</span>
+          </div>
+        </Match>
+        <Match when={true}>
+          <ConnectionBadge connected={isConnected} />
+        </Match>
+      </Switch>
     );
   }
 
   function Event() {
     return (
-      <div class="card">
-        <div class="text-xs text-zinc-500 mb-2">Event</div>
+      <Section title="Event">
         <div class="grid grid-cols-2 gap-2">
           <input
             type="text"
             placeholder="Event name"
             value={state.title}
-            class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm"
+            class="input input-sm input-bordered"
             onBlur={(event) => {
               setState("title", event.target.value);
               sendUpdate();
@@ -282,63 +283,57 @@ function App() {
           />
           <select
             value={String(state.numberOfHoles)}
-            class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm"
+            class="select select-sm select-bordered"
             onChange={(event) => changeNumberOfHoles(parseInt(event.target.value))}
           >
             <option value="9">9 Holes</option>
             <option value="18">18 Holes</option>
           </select>
         </div>
-      </div>
+      </Section>
     );
   }
 
   function Players() {
     return (
-      <div class="card">
-        <div class="flex items-center justify-between mb-2">
-          <div class="text-xs text-zinc-500">Players</div>
-          <div class="flex gap-1">
-            <button
-              class="btn-xs border-zinc-700 text-zinc-400"
-              disabled={state.players.length <= 1}
-              onClick={removePlayer}
-            >
-              − Player
-            </button>
-            <button
-              class="btn-xs border-zinc-600 text-zinc-300"
-              disabled={state.players.length >= 4}
-              onClick={addPlayer}
-            >
-              + Player
-            </button>
-          </div>
+      <Section title="Players">
+        <div class="flex justify-end gap-1">
+          <button
+            class="btn btn-xs"
+            disabled={state.players.length <= 1}
+            onClick={removePlayer}
+          >
+            − Player
+          </button>
+          <button
+            class="btn btn-xs btn-primary"
+            disabled={state.players.length >= 4}
+            onClick={addPlayer}
+          >
+            + Player
+          </button>
         </div>
-        <div class="space-y-1">
-          <For each={state.players}>
-            {(player, playerIndex) => (
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-zinc-500 w-16 shrink-0">Player {playerIndex() + 1}</span>
-                <input
-                  type="text"
-                  class="flex-1 bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm"
-                  placeholder="Name"
-                  value={player.name}
-                  onBlur={(event) => setPlayerName(playerIndex(), event.target.value)}
-                />
-              </div>
-            )}
-          </For>
-        </div>
-      </div>
+        <For each={state.players}>
+          {(player, playerIndex) => (
+            <div class="flex items-center gap-2">
+              <span class="text-xs opacity-60 w-16 shrink-0">Player {playerIndex() + 1}</span>
+              <input
+                type="text"
+                class="input input-sm input-bordered flex-1"
+                placeholder="Name"
+                value={player.name}
+                onBlur={(event) => setPlayerName(playerIndex(), event.target.value)}
+              />
+            </div>
+          )}
+        </For>
+      </Section>
     );
   }
 
   function CurrentHole() {
     return (
-      <div class="card">
-        <div class="text-xs text-zinc-500 mb-2">Current Hole</div>
+      <Section title="Current Hole">
         <div class="flex gap-2 items-center flex-wrap">
           <div class="flex flex-wrap gap-1 flex-1">
             <For each={Array.from({ length: state.numberOfHoles }, (_, holeIndex) => holeIndex)}>
@@ -348,15 +343,14 @@ function App() {
                 const anyScored = () =>
                   state.players.some((player) => player.scores[holeIndex] >= 0);
                 const isActive = () => holeIndex === state.currentHole;
-                const extraClass = () => {
-                  if (isActive()) return "";
-                  if (allScored()) return " complete";
-                  if (anyScored()) return " played";
-                  return "";
-                };
                 return (
                   <button
-                    class={`hole-btn${isActive() ? " active" : ""}${extraClass()}`}
+                    class="btn btn-xs btn-square"
+                    classList={{
+                      "btn-success": isActive(),
+                      "btn-outline btn-success": !isActive() && allScored(),
+                      "btn-outline btn-neutral": !isActive() && !allScored() && anyScored(),
+                    }}
                     onClick={() => selectHole(holeIndex)}
                   >
                     {holeIndex + 1}
@@ -365,11 +359,11 @@ function App() {
               }}
             </For>
           </div>
-          <div class="flex items-center gap-1 shrink-0">
-            <span class="text-xs text-zinc-500">Par</span>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs opacity-60">Par</span>
             <select
               value={String(state.pars[state.currentHole] ?? 4)}
-              class="bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-sm"
+              class="select select-sm select-bordered"
               onChange={(event) => changeCurrentPar(parseInt(event.target.value))}
             >
               <For each={[9, 8, 7, 6, 5, 4, 3, 2, 1]}>
@@ -378,70 +372,66 @@ function App() {
             </select>
           </div>
         </div>
-      </div>
+      </Section>
     );
   }
 
   function Scores() {
     return (
-      <div class="card">
-        <div class="text-xs text-zinc-500 mb-2">Scores — Hole {state.currentHole + 1}</div>
-        <div class="space-y-2">
-          <For each={state.players}>
-            {(player, playerIndex) => {
-              const par = () => state.pars[state.currentHole] ?? 4;
-              const val = () => player.scores[state.currentHole];
-              const selectColor = () => scoreOptionColor(val(), par());
-              return (
-                <div class="flex items-center gap-2">
-                  <span class="text-sm flex-1 truncate">{player.name}</span>
-                  <select
-                    class="score-select"
-                    style={{ color: val() >= 0 ? selectColor() : "" }}
-                    value={String(val())}
-                    onChange={(event) => {
-                      const score = parseInt(event.target.value);
-                      event.target.style.color = score >= 0 ? scoreOptionColor(score, par()) : "";
-                      setScore(playerIndex(), state.currentHole, score);
-                    }}
+      <Section title={`Scores — Hole ${state.currentHole + 1}`}>
+        <For each={state.players}>
+          {(player, playerIndex) => {
+            const par = () => state.pars[state.currentHole] ?? 4;
+            const val = () => player.scores[state.currentHole];
+            const selectColor = () => scoreOptionColor(val(), par());
+            return (
+              <div class="flex items-center gap-2">
+                <span class="text-sm flex-1 truncate">{player.name}</span>
+                <select
+                  class="select select-sm select-bordered"
+                  style={{ color: val() >= 0 ? selectColor() : "" }}
+                  value={String(val())}
+                  onChange={(event) => {
+                    const score = parseInt(event.target.value);
+                    event.target.style.color = score >= 0 ? scoreOptionColor(score, par()) : "";
+                    setScore(playerIndex(), state.currentHole, score);
+                  }}
+                >
+                  <For
+                    each={Array.from(
+                      { length: MAX_SCORE },
+                      (_, scoreIndex) => MAX_SCORE - scoreIndex,
+                    )}
                   >
-                    <For
-                      each={Array.from(
-                        { length: MAX_SCORE },
-                        (_, scoreIndex) => MAX_SCORE - scoreIndex,
-                      )}
-                    >
-                      {(score) => {
-                        const color = scoreOptionColor(score, par());
-                        const rel = fmtRelPar(score - par());
-                        return (
-                          <option value={String(score)} style={{ color }}>
-                            {score} ({rel})
-                          </option>
-                        );
-                      }}
-                    </For>
-                    <option value="-1">-</option>
-                  </select>
-                </div>
-              );
-            }}
-          </For>
-        </div>
-      </div>
+                    {(score) => {
+                      const color = scoreOptionColor(score, par());
+                      const rel = fmtRelPar(score - par());
+                      return (
+                        <option value={String(score)} style={{ color }}>
+                          {score} ({rel})
+                        </option>
+                      );
+                    }}
+                  </For>
+                  <option value="-1">-</option>
+                </select>
+              </div>
+            );
+          }}
+        </For>
+      </Section>
     );
   }
 
   function Leaderboard() {
     return (
-      <div class="card">
-        <div class="text-xs text-zinc-500 mb-2">Leaderboard</div>
-        <table class="w-full text-sm">
+      <Section title="Leaderboard">
+        <table class="table table-xs">
           <thead>
-            <tr class="text-xs text-zinc-500">
-              <th class="text-left pb-1">Player</th>
-              <th class="text-right pb-1">Score</th>
-              <th class="text-right pb-1">Thru</th>
+            <tr>
+              <th class="text-left">Player</th>
+              <th class="text-right">Score</th>
+              <th class="text-right">Thru</th>
             </tr>
           </thead>
           <tbody>
@@ -450,123 +440,116 @@ function App() {
                 const thruText = thru === 0 ? "–" : thru < state.numberOfHoles ? String(thru) : "F";
                 return (
                   <tr>
-                    <td class="py-1 truncate max-w-xs">{name}</td>
+                    <td class="truncate max-w-xs">{name}</td>
                     <td class={`text-right font-bold text-base ${totalClass(total)}`}>
                       {fmtRelPar(total)}
                     </td>
-                    <td class="text-right text-zinc-500 text-xs">{thruText}</td>
+                    <td class="text-right opacity-60 text-xs">{thruText}</td>
                   </tr>
                 );
               }}
             </For>
           </tbody>
         </table>
-      </div>
+      </Section>
     );
   }
 
   function FullScorecard() {
     return (
-      <div class="card">
-        <details>
-          <summary class="text-sm text-zinc-400 cursor-pointer py-1">Full Scorecard</summary>
-          <div class="overflow-x-auto mt-2">
-            <table class="scorecard-table text-xs">
-              <thead>
-                <tr>
-                  <th class="player-name-cell">Player</th>
-                  <For
-                    each={Array.from({ length: state.numberOfHoles }, (_, holeIndex) => holeIndex)}
-                  >
-                    {(holeIndex) => <th>{holeIndex + 1}</th>}
-                  </For>
-                  <th class="total-cell">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="player-name-cell text-zinc-500">Par</td>
-                  <For each={state.pars.slice(0, state.numberOfHoles)}>
-                    {(par) => <td class="text-zinc-500">{par}</td>}
-                  </For>
-                  <td class="total-cell text-zinc-500">
-                    {state.pars.slice(0, state.numberOfHoles).reduce((sum, par) => sum + par, 0)}
-                  </td>
-                </tr>
-                <For each={state.players}>
-                  {(player, playerIndex) => {
-                    const total = () =>
-                      totalRelativeToPar(
-                        state.players,
-                        state.pars,
-                        state.numberOfHoles,
-                        playerIndex(),
+      <div class="card bg-base-200 border border-base-300">
+        <div class="card-body p-3">
+          <details>
+            <summary class="cursor-pointer text-sm opacity-80">Full Scorecard</summary>
+            <div class="overflow-x-auto mt-2">
+              <table class="scorecard-table text-xs">
+                <thead>
+                  <tr>
+                    <th class="player-name-cell">Player</th>
+                    <For
+                      each={Array.from({ length: state.numberOfHoles }, (_, holeIndex) => holeIndex)}
+                    >
+                      {(holeIndex) => <th>{holeIndex + 1}</th>}
+                    </For>
+                    <th class="total-cell">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="player-name-cell opacity-60">Par</td>
+                    <For each={state.pars.slice(0, state.numberOfHoles)}>
+                      {(par) => <td class="opacity-60">{par}</td>}
+                    </For>
+                    <td class="total-cell opacity-60">
+                      {state.pars.slice(0, state.numberOfHoles).reduce((sum, par) => sum + par, 0)}
+                    </td>
+                  </tr>
+                  <For each={state.players}>
+                    {(player, playerIndex) => {
+                      const total = () =>
+                        totalRelativeToPar(
+                          state.players,
+                          state.pars,
+                          state.numberOfHoles,
+                          playerIndex(),
+                        );
+                      const strokes = () =>
+                        totalStrokes(state.players, state.numberOfHoles, playerIndex());
+                      const totalText = () => {
+                        const strokesTotal = strokes();
+                        const totalScore = total();
+                        return strokesTotal > 0
+                          ? `${strokesTotal} (${fmtRelPar(totalScore)})`
+                          : fmtRelPar(totalScore);
+                      };
+                      return (
+                        <tr>
+                          <td class="player-name-cell">{player.name}</td>
+                          <For
+                            each={Array.from(
+                              { length: state.numberOfHoles },
+                              (_, holeIndex) => holeIndex,
+                            )}
+                          >
+                            {(holeIndex) => {
+                              const score = player.scores[holeIndex];
+                              const cls = scoreClass(score, state.pars[holeIndex]);
+                              return <td class={cls}>{score >= 0 ? score : ""}</td>;
+                            }}
+                          </For>
+                          <td class={`total-cell ${totalClass(total())}`}>{totalText()}</td>
+                        </tr>
                       );
-                    const strokes = () =>
-                      totalStrokes(state.players, state.numberOfHoles, playerIndex());
-                    const totalText = () => {
-                      const strokesTotal = strokes();
-                      const totalScore = total();
-                      return strokesTotal > 0
-                        ? `${strokesTotal} (${fmtRelPar(totalScore)})`
-                        : fmtRelPar(totalScore);
-                    };
-                    return (
-                      <tr>
-                        <td class="player-name-cell">{player.name}</td>
-                        <For
-                          each={Array.from(
-                            { length: state.numberOfHoles },
-                            (_, holeIndex) => holeIndex,
-                          )}
-                        >
-                          {(holeIndex) => {
-                            const score = player.scores[holeIndex];
-                            const cls = scoreClass(score, state.pars[holeIndex]);
-                            return <td class={cls}>{score >= 0 ? score : ""}</td>;
-                          }}
-                        </For>
-                        <td class={`total-cell ${totalClass(total())}`}>{totalText()}</td>
-                      </tr>
-                    );
-                  }}
-                </For>
-              </tbody>
-            </table>
-          </div>
-        </details>
-      </div>
-    );
-  }
-
-  function Buttons() {
-    return (
-      <div class="card">
-        <button class="new-round-btn border-zinc-700 text-red-400" onClick={newRound}>
-          New Round
-        </button>
+                    }}
+                  </For>
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </div>
       </div>
     );
   }
 
   return (
-    <div class="max-w-3xl mx-auto space-y-2">
+    <div class="max-w-3xl mx-auto space-y-3">
       <h1 class="text-2xl font-bold text-center">Moblin Golf Scoreboard</h1>
       <BasicLinks />
-      <ConnectionStatus />
+      <ConnectionRow />
       <Event />
       <Players />
       <CurrentHole />
       <Scores />
       <Leaderboard />
       <FullScorecard />
-      <Buttons />
+      <button class="btn btn-sm btn-error btn-outline w-full" onClick={newRound}>
+        New Round
+      </button>
       <ConfirmDialog
         open={confirmOpen}
         message={confirmMessage}
         onOk={confirmOk}
         onCancel={confirmCancel}
-        okTextClass="text-zinc-300"
       />
     </div>
   );

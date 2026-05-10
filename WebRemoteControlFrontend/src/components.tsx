@@ -5,18 +5,17 @@ import { twMerge } from "tailwind-merge";
 interface ButtonProps {
   class?: string;
   type?: "button" | "submit" | "reset";
+  disabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: JSX.Element;
 }
 
-export function Button({ class: extraClass, type = "button", onClick, children }: ButtonProps) {
+export function Button({ class: extraClass, type = "button", disabled, onClick, children }: ButtonProps) {
   return (
     <button
       type={type}
-      class={twMerge(
-        "cursor-pointer rounded border border-zinc-700 px-3 py-1 text-sm transition-colors hover:bg-zinc-800",
-        extraClass,
-      )}
+      disabled={disabled}
+      class={twMerge("btn btn-sm", extraClass)}
       onClick={onClick}
     >
       {children}
@@ -29,7 +28,7 @@ interface ConfirmDialogProps {
   message: Accessor<string>;
   onOk: () => void;
   onCancel: () => void;
-  okTextClass: string;
+  okClass?: string;
   okLabel?: string;
 }
 
@@ -38,35 +37,24 @@ export function ConfirmDialog({
   message,
   onOk,
   onCancel,
-  okTextClass,
+  okClass = "btn-primary",
   okLabel = "OK",
 }: ConfirmDialogProps) {
   return (
     <Show when={open()}>
-      <dialog
-        open
-        class="backdrop:bg-black/60 rounded-xl p-0"
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          margin: 0,
-        }}
-      >
-        <form method="dialog" class="bg-zinc-900 text-zinc-100">
-          <div class="p-2">
-            <p class="text-zinc-300">{message()}</p>
-          </div>
-          <div class="bg-zinc-800/60 px-4 py-3 sm:px-5 flex items-center justify-end gap-2">
-            <Button class={`py-1.5 rounded-md ${okTextClass}`} onClick={onOk}>
-              {okLabel}
-            </Button>
-            <Button class="py-1.5 rounded-md text-zinc-300" onClick={onCancel}>
+      <dialog open class="modal modal-open">
+        <div class="modal-box max-w-sm">
+          <p>{message()}</p>
+          <div class="modal-action">
+            <button type="button" class="btn btn-sm btn-ghost" onClick={onCancel}>
               Cancel
-            </Button>
+            </button>
+            <button type="button" class={twMerge("btn btn-sm", okClass)} onClick={onOk}>
+              {okLabel}
+            </button>
           </div>
-        </form>
+        </div>
+        <div class="modal-backdrop" onClick={onCancel} />
       </dialog>
     </Show>
   );
@@ -74,20 +62,18 @@ export function ConfirmDialog({
 
 export function Section(props: ParentProps<{ title: string }>) {
   return (
-    <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-2">
-      <h2 class="text-xl font-semibold mb-3">{props.title}</h2>
-      {props.children}
+    <div class="card bg-base-200 border border-base-300">
+      <div class="card-body p-3 gap-3">
+        <h2 class="card-title text-lg">{props.title}</h2>
+        {props.children}
+      </div>
     </div>
   );
 }
 
 export function GitHubLink() {
   return (
-    <a
-      href="https://github.com/eerimoq/moblin"
-      target="_blank"
-      class="text-indigo-400 hover:text-indigo-300 text-sm"
-    >
+    <a href="https://github.com/eerimoq/moblin" target="_blank" class="link link-primary text-sm">
       Github
     </a>
   );
@@ -95,7 +81,7 @@ export function GitHubLink() {
 
 export function RemoteControlLink() {
   return (
-    <a href="./" class="text-indigo-400 hover:text-indigo-300 text-sm">
+    <a href="./" class="link link-primary text-sm">
       Remote Control
     </a>
   );
@@ -103,7 +89,7 @@ export function RemoteControlLink() {
 
 export function BasicLinks() {
   return (
-    <div class="pb-1 text-center space-x-4">
+    <div class="text-center space-x-4 pb-1">
       <RemoteControlLink />
       <GitHubLink />
     </div>
@@ -124,20 +110,20 @@ export interface PickerProps {
 
 export function Picker({ name, options, value, onChange }: PickerProps) {
   return (
-    <div class="flex items-center space-x-4">
-      <label class="text-sm text-zinc-200 w-24 shrink-0">{name}</label>
-      <Show when={options().length > 0}>
+    <Show when={options().length > 0}>
+      <label class="flex items-center gap-3">
+        <span class="text-sm w-32 shrink-0">{name}</span>
         <select
-          class="bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-sm text-zinc-200 flex-1"
+          class="select select-sm select-bordered flex-1"
           value={value()}
           onChange={(event) => onChange(event.target.value)}
         >
           <For each={options()}>
-            {(option) => <option value={option.id}> {option.name} </option>}
+            {(option) => <option value={option.id}>{option.name}</option>}
           </For>
         </select>
-      </Show>
-    </div>
+      </label>
+    </Show>
   );
 }
 
@@ -150,22 +136,36 @@ export interface ToggleProps {
 
 export function Toggle(props: ToggleProps) {
   return (
-    <label class="flex items-center cursor-pointer">
-      <div class="relative flex items-center">
-        <input
-          id={props.id}
-          type="checkbox"
-          class="peer appearance-none w-11 h-5 bg-slate-400 rounded-full checked:bg-indigo-800 cursor-pointer transition-colors duration-300"
-          checked={props.checked}
-          role="switch"
-          onChange={props.onChange}
-        />
-        <label
-          for={props.id}
-          class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-indigo-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer"
-        />
-        <span class="ml-3 text-sm text-zinc-200">{props.label}</span>
-      </div>
+    <label for={props.id} class="flex items-center gap-3 cursor-pointer">
+      <input
+        id={props.id}
+        type="checkbox"
+        class="toggle toggle-primary"
+        checked={props.checked}
+        role="switch"
+        onChange={props.onChange}
+      />
+      <span class="text-sm">{props.label}</span>
     </label>
+  );
+}
+
+interface ConnectionBadgeProps {
+  connected: Accessor<boolean>;
+}
+
+export function ConnectionBadge({ connected }: ConnectionBadgeProps) {
+  return (
+    <div class="text-center pb-1">
+      <span
+        class="badge badge-sm"
+        classList={{
+          "badge-success": connected(),
+          "badge-warning": !connected(),
+        }}
+      >
+        {connected() ? "Connected" : "Connecting..."}
+      </span>
+    </div>
   );
 }

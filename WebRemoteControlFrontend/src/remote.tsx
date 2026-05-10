@@ -92,6 +92,15 @@ const CONTROL_ORDER = [
   "possession",
 ];
 
+// Sizing for the dense scoreboard control surface.
+const BTN_TOP = "btn h-10 min-h-0 text-xs uppercase";
+const BTN_CTRL = "btn h-12 min-h-0 text-sm uppercase";
+const BTN_SCORE = "btn h-[4.5rem] min-h-0 text-xl bg-white text-black hover:bg-zinc-200";
+const DISP_BOX = "flex items-center justify-center rounded text-2xl h-10";
+const DISP_SM = "flex items-center justify-center rounded border border-base-300 h-12 w-full";
+const CONF_INPUT = "h-9 bg-black rounded px-2 text-center w-full outline-none";
+const CONF_LABEL = "flex items-center justify-center bg-black rounded text-[10px] opacity-70";
+
 function emptyTeam() {
   return {
     name: "",
@@ -567,19 +576,16 @@ function App() {
   function Clock() {
     return (
       <Show when={scoreboardState.global.showClock}>
-        <div>
-          <div class="card grid grid-cols-4 gap-2 items-center shadow-xl">
-            <button
-              class="btn btn-top bg-indigo-600 text-white border-none"
-              onClick={sendToggleClock}
-            >
+        <div class="card bg-base-200 border border-base-300">
+          <div class="card-body p-2 grid grid-cols-4 gap-2 items-center">
+            <button class={`${BTN_TOP} btn-primary`} onClick={sendToggleClock}>
               Clock
             </button>
             <input
               type="text"
               placeholder="0:00"
               value={scoreboardState.global.timer}
-              class="btn-top font-mono text-lg text-indigo-400 bg-black rounded"
+              class="h-10 font-mono text-lg text-primary bg-black rounded text-center outline-none"
               onFocus={() => setActiveInputId("clock")}
               onBlur={(event) => {
                 setActiveInputId(null);
@@ -587,7 +593,7 @@ function App() {
               }}
             />
             <select
-              class="btn-top bg-black rounded"
+              class="select select-sm select-bordered h-10"
               value={scoreboardState.global.duration}
               onChange={(event) =>
                 connection.sendRequest({
@@ -600,7 +606,7 @@ function App() {
               </For>
             </select>
             <select
-              class="btn-top bg-black rounded"
+              class="select select-sm select-bordered h-10"
               value={scoreboardState.global.timerDirection}
               onChange={(event) => setClockDirection(event.target.value)}
             >
@@ -615,24 +621,28 @@ function App() {
 
   function HistoricalScores() {
     return (
-      <details>
-        <summary>HISTORICAL SCORES</summary>
-        <div class="grid grid-cols-5 gap-1 mt-1">
-          <For each={[1, 2, 3, 4, 5]}>
-            {(setNumber) => (
-              <div class="flex flex-col gap-1">
-                <div
-                  class="text-center text-[9px] text-zinc-500 border border-transparent rounded cursor-pointer hover:border-zinc-600"
-                  classList={{
-                    "active-set border-yellow-600":
-                      scoreboardState.global.period === String(setNumber),
-                  }}
-                  onClick={() => setHistoricPeriod(setNumber)}
-                >
-                  SET {setNumber}
-                </div>
-                <div class="h-8 rounded bg-zinc-800 border border-zinc-700">
+      <div class="collapse collapse-arrow bg-base-200 border border-base-300">
+        <input type="checkbox" />
+        <div class="collapse-title text-xs uppercase opacity-70 py-2 min-h-0">
+          Historical scores
+        </div>
+        <div class="collapse-content">
+          <div class="grid grid-cols-5 gap-1">
+            <For each={[1, 2, 3, 4, 5]}>
+              {(setNumber) => (
+                <div class="flex flex-col gap-1">
+                  <button
+                    class="text-center text-[9px] py-1 rounded border border-transparent hover:border-base-300"
+                    classList={{
+                      "border-warning text-warning":
+                        scoreboardState.global.period === String(setNumber),
+                    }}
+                    onClick={() => setHistoricPeriod(setNumber)}
+                  >
+                    SET {setNumber}
+                  </button>
                   <select
+                    class="select select-xs select-bordered h-8"
                     value={String(scoreboardState.team1[`secondaryScore${setNumber}`] ?? "")}
                     onChange={(event) => setHistoricScore(1, setNumber, event.target.value)}
                   >
@@ -643,9 +653,8 @@ function App() {
                       {(scoreValue) => <option value={String(scoreValue)}>{scoreValue}</option>}
                     </For>
                   </select>
-                </div>
-                <div class="h-8 rounded bg-zinc-800 border border-zinc-700">
                   <select
+                    class="select select-xs select-bordered h-8"
                     value={String(scoreboardState.team2[`secondaryScore${setNumber}`] ?? "")}
                     onChange={(event) => setHistoricScore(2, setNumber, event.target.value)}
                   >
@@ -657,21 +666,21 @@ function App() {
                     </For>
                   </select>
                 </div>
-              </div>
-            )}
-          </For>
+              )}
+            </For>
+          </div>
         </div>
-      </details>
+      </div>
     );
   }
 
   function NewSetMatch() {
     return (
       <div class="grid grid-cols-2 gap-2">
-        <button class="btn btn-ctrl border-zinc-600" onClick={nextSet}>
+        <button class={BTN_CTRL} onClick={nextSet}>
           {scoreboardState.global.scoringMode === "tennis" ? "Start next set" : "Next set/period"}
         </button>
-        <button class="btn btn-ctrl border-red-900 text-red-400" onClick={newMatch}>
+        <button class={`${BTN_CTRL} btn-error btn-outline`} onClick={newMatch}>
           New match
         </button>
       </div>
@@ -680,126 +689,129 @@ function App() {
 
   function Configuration() {
     return (
-      <details open>
-        <summary>
-          <span>SCOREBOARD CONFIGURATION</span>
+      <div class="collapse collapse-arrow bg-base-200 border border-base-300" tabIndex={0}>
+        <input type="checkbox" checked />
+        <div class="collapse-title flex items-center justify-between text-xs uppercase opacity-70 py-2 min-h-0 pr-8">
+          <span>Scoreboard configuration</span>
           <span
-            class="status-text"
+            class="badge badge-xs"
             classList={{
-              "text-green-500": connected(),
-              "text-red-500": !connected(),
+              "badge-success": connected(),
+              "badge-error": !connected(),
             }}
           >
             {connected() ? "Connected" : "Disconnected"}
           </span>
-        </summary>
-        <div class="card grid grid-cols-4 gap-2 mt-1">
-          <Show when={sports().length > 0}>
-            <select
-              class="col-span-2 btn h-9 text-[10px] bg-black"
-              value={scoreboardState.sportId}
-              onChange={(event) => switchSport(event.target.value)}
-            >
-              <option value="">CHANGE SPORT...</option>
-              <For each={sports()}>
-                {(sportName) => <option value={sportName}>{sportName.toUpperCase()}</option>}
-              </For>
-            </select>
-          </Show>
-          <select
-            class="col-span-2 btn h-9 text-[10px] bg-black"
-            value={scoreboardState.layout}
-            onChange={(event) => switchLayout(event.target.value)}
-          >
-            <option value="stacked">Stacked</option>
-            <option value="stackedInline">Stacked inline</option>
-            <option value="sideBySide">Side by side</option>
-            <option value="stackHistory">Stack history</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="TITLE"
-            class="col-span-2 conf-input px-2"
-            value={scoreboardState.global.title}
-            onFocus={() => setActiveInputId("title")}
-            onBlur={(event) => {
-              setActiveInputId(null);
-              setTitle(event.target.value);
-            }}
-            onChange={(event) => {
-              if (activeInputId() === "title") setTitle(event.target.value);
-            }}
-          />
-          <div class="conf-label">{scoreboardState.global.periodLabel || "PER"}</div>
-          <input
-            type="text"
-            class="conf-input"
-            value={scoreboardState.global.period}
-            onFocus={() => setActiveInputId("period")}
-            onBlur={(event) => {
-              setActiveInputId(null);
-              setPeriod(event.target.value);
-            }}
-            onChange={(event) => {
-              if (activeInputId() === "period") setPeriod(event.target.value);
-            }}
-          />
-          <button
-            class="btn h-9 text-[10px]"
-            classList={{ "btn-active": scoreboardState.global.showTitle }}
-            onClick={() => toggleGlobal("showTitle")}
-          >
-            Title
-          </button>
-          <button
-            class="btn h-9 text-[10px]"
-            classList={{ "btn-active": scoreboardState.global.showMoreStats }}
-            onClick={() => toggleGlobal("showMoreStats")}
-          >
-            More stats
-          </button>
-          <button
-            class="btn h-9 text-[10px]"
-            classList={{ "btn-active": scoreboardState.global.showStats }}
-            onClick={() => toggleGlobal("showStats")}
-          >
-            Info box
-          </button>
-          <input
-            type="text"
-            placeholder="INFO BOX"
-            class="conf-input px-2"
-            value={scoreboardState.global.infoBoxText}
-            onFocus={() => setActiveInputId("info-box")}
-            onBlur={(event) => {
-              setActiveInputId(null);
-              setInfoBoxText(event.target.value);
-            }}
-            onChange={(event) => {
-              if (activeInputId() === "info-box") setInfoBoxText(event.target.value);
-            }}
-          />
-          <button
-            class="btn h-9 text-[10px]"
-            classList={{ "btn-active": scoreboardState.global.showClock }}
-            onClick={() => toggleGlobal("showClock")}
-          >
-            Clock
-          </button>
         </div>
-      </details>
+        <div class="collapse-content">
+          <div class="grid grid-cols-4 gap-2">
+            <Show when={sports().length > 0}>
+              <select
+                class="col-span-2 select select-sm select-bordered text-[10px] uppercase"
+                value={scoreboardState.sportId}
+                onChange={(event) => switchSport(event.target.value)}
+              >
+                <option value="">Change sport...</option>
+                <For each={sports()}>
+                  {(sportName) => <option value={sportName}>{sportName.toUpperCase()}</option>}
+                </For>
+              </select>
+            </Show>
+            <select
+              class="col-span-2 select select-sm select-bordered text-[10px]"
+              value={scoreboardState.layout}
+              onChange={(event) => switchLayout(event.target.value)}
+            >
+              <option value="stacked">Stacked</option>
+              <option value="stackedInline">Stacked inline</option>
+              <option value="sideBySide">Side by side</option>
+              <option value="stackHistory">Stack history</option>
+            </select>
+
+            <input
+              type="text"
+              placeholder="TITLE"
+              class={`col-span-2 ${CONF_INPUT}`}
+              value={scoreboardState.global.title}
+              onFocus={() => setActiveInputId("title")}
+              onBlur={(event) => {
+                setActiveInputId(null);
+                setTitle(event.target.value);
+              }}
+              onChange={(event) => {
+                if (activeInputId() === "title") setTitle(event.target.value);
+              }}
+            />
+            <div class={CONF_LABEL}>{scoreboardState.global.periodLabel || "PER"}</div>
+            <input
+              type="text"
+              class={CONF_INPUT}
+              value={scoreboardState.global.period}
+              onFocus={() => setActiveInputId("period")}
+              onBlur={(event) => {
+                setActiveInputId(null);
+                setPeriod(event.target.value);
+              }}
+              onChange={(event) => {
+                if (activeInputId() === "period") setPeriod(event.target.value);
+              }}
+            />
+            <button
+              class={BTN_TOP}
+              classList={{ "btn-warning": scoreboardState.global.showTitle }}
+              onClick={() => toggleGlobal("showTitle")}
+            >
+              Title
+            </button>
+            <button
+              class={BTN_TOP}
+              classList={{ "btn-warning": scoreboardState.global.showMoreStats }}
+              onClick={() => toggleGlobal("showMoreStats")}
+            >
+              More stats
+            </button>
+            <button
+              class={BTN_TOP}
+              classList={{ "btn-warning": scoreboardState.global.showStats }}
+              onClick={() => toggleGlobal("showStats")}
+            >
+              Info box
+            </button>
+            <input
+              type="text"
+              placeholder="INFO BOX"
+              class={CONF_INPUT}
+              value={scoreboardState.global.infoBoxText}
+              onFocus={() => setActiveInputId("info-box")}
+              onBlur={(event) => {
+                setActiveInputId(null);
+                setInfoBoxText(event.target.value);
+              }}
+              onChange={(event) => {
+                if (activeInputId() === "info-box") setInfoBoxText(event.target.value);
+              }}
+            />
+            <button
+              class={BTN_TOP}
+              classList={{ "btn-warning": scoreboardState.global.showClock }}
+              onClick={() => toggleGlobal("showClock")}
+            >
+              Clock
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
   function Status() {
     return (
-      <div class="btn-top border border-zinc-800 rounded font-mono text-xs flex items-center justify-center gap-4 text-zinc-500">
+      <div class="rounded border border-base-300 bg-base-200 h-10 font-mono text-xs flex items-center justify-center gap-4 opacity-80">
         <div>
-          BIT: <span class="text-white">{bitrateMessage() || "--"}</span>
+          BIT: <span class="text-base-content font-semibold">{bitrateMessage() || "--"}</span>
         </div>
         <div>
-          BAT: <span class="text-white">{batteryLevel() || "--"}</span>
+          BAT: <span class="text-base-content font-semibold">{batteryLevel() || "--"}</span>
         </div>
       </div>
     );
@@ -820,7 +832,6 @@ function App() {
         message={confirmMessage}
         onOk={confirmOk}
         onCancel={confirmCancel}
-        okTextClass="text-zinc-300"
       />
     </>
   );
@@ -874,7 +885,6 @@ function TeamColumn({
       if (control.type === "counter") {
         result.push({ kind: "counter", key, c: control });
       } else {
-        // Try to pack two consecutive non-counter controls
         let nextKey: string | null = null;
         let nextControl: ControlDef | null = null;
         for (let searchIndex = orderIndex + 1; searchIndex < CONTROL_ORDER.length; searchIndex++) {
@@ -907,7 +917,7 @@ function TeamColumn({
       <div class="rounded-t p-1" style={{ background: team().bgColor }}>
         <input
           type="text"
-          class=""
+          class="w-full bg-transparent text-center outline-none"
           value={team().name}
           onBlur={(event) => onNameChange(teamNumber, event.target.value)}
         />
@@ -917,87 +927,93 @@ function TeamColumn({
 
   function Controls() {
     return (
-      <div class="card rounded-t-none">
-        <div class="grid grid-cols-4 gap-1 h-10 mb-2">
-          <div class="disp-box" style={{ background: team().bgColor, color: team().textColor }}>
-            {team().primaryScore}
+      <div class="card bg-base-200 border border-base-300 rounded-t-none">
+        <div class="card-body p-2 gap-2">
+          <div class="grid grid-cols-4 gap-1 h-10">
+            <div class={DISP_BOX} style={{ background: team().bgColor, color: team().textColor }}>
+              {team().primaryScore}
+            </div>
+            <div
+              class={DISP_BOX}
+              style={{
+                background: team().bgColor,
+                color: "white",
+                "box-shadow": "inset 0 0 0 100px rgba(0, 0, 0, 0.3)",
+              }}
+            >
+              {secScore()}
+            </div>
+            <div class="rounded border border-base-300 bg-base-300">
+              <input
+                type="color"
+                class="appearance-none border-0 w-full h-full p-0 cursor-pointer"
+                value={team().bgColor}
+                onInput={(event) => onBgColor(teamNumber, event.target.value)}
+              />
+            </div>
+            <div class="rounded border border-base-300 bg-base-300">
+              <input
+                type="color"
+                class="appearance-none border-0 w-full h-full p-0 cursor-pointer"
+                value={team().textColor}
+                onInput={(event) => onTextColor(teamNumber, event.target.value)}
+              />
+            </div>
           </div>
-          <div class="disp-box m-shadow" style={{ background: team().bgColor, color: "white" }}>
-            {secScore()}
+          <div class="grid grid-cols-3 gap-1">
+            <button
+              class={`col-span-2 ${BTN_SCORE}`}
+              onClick={() => onAdjust(teamNumber, "primaryScore", 1)}
+            >
+              +Pt
+            </button>
+            <button
+              class={BTN_SCORE}
+              onClick={() => onAdjust(teamNumber, "primaryScore", -1)}
+            >
+              -Pt
+            </button>
           </div>
-          <div class="rounded border border-zinc-700 bg-zinc-800">
-            <input
-              type="color"
-              value={team().bgColor}
-              onInput={(event) => onBgColor(teamNumber, event.target.value)}
-            />
-          </div>
-          <div class="rounded border border-zinc-700 bg-zinc-800">
-            <input
-              type="color"
-              value={team().textColor}
-              onInput={(event) => onTextColor(teamNumber, event.target.value)}
-            />
-          </div>
-        </div>
-        <div class="grid grid-cols-3 gap-1 mb-2">
-          <button
-            class="col-span-2 btn btn-score"
-            onClick={() => onAdjust(teamNumber, "primaryScore", 1)}
-          >
-            +Pt
-          </button>
-          <button
-            class="col-span-1 btn btn-score"
-            onClick={() => onAdjust(teamNumber, "primaryScore", -1)}
-          >
-            -Pt
-          </button>
-        </div>
-        <For each={controls()}>
-          {(ctrl) => {
-            if (ctrl.kind === "counter") {
+          <For each={controls()}>
+            {(ctrl) => {
+              if (ctrl.kind === "counter") {
+                return (
+                  <div class="grid grid-cols-2 gap-1">
+                    <button class={BTN_CTRL} onClick={() => onAdjust(teamNumber, ctrl.key, 1)}>
+                      +{ctrl.c.label}
+                    </button>
+                    <button class={BTN_CTRL} onClick={() => onAdjust(teamNumber, ctrl.key, -1)}>
+                      -{ctrl.c.label}
+                    </button>
+                  </div>
+                );
+              }
+              if (ctrl.kind === "packed") {
+                return (
+                  <div class="grid grid-cols-2 gap-1">
+                    <ControlWidget
+                      teamNumber={teamNumber}
+                      controlKey={ctrl.key}
+                      control={ctrl.c}
+                      team={team()}
+                      onCycle={onCycle}
+                      onToggle={onToggle}
+                      onSelect={onSelectControl}
+                    />
+                    <ControlWidget
+                      teamNumber={teamNumber}
+                      controlKey={ctrl.nextKey}
+                      control={ctrl.nextC}
+                      team={team()}
+                      onCycle={onCycle}
+                      onToggle={onToggle}
+                      onSelect={onSelectControl}
+                    />
+                  </div>
+                );
+              }
               return (
-                <div class="grid grid-cols-2 gap-1 mb-1">
-                  <button class="btn btn-ctrl" onClick={() => onAdjust(teamNumber, ctrl.key, 1)}>
-                    +{ctrl.c.label}
-                  </button>
-                  <button class="btn btn-ctrl" onClick={() => onAdjust(teamNumber, ctrl.key, -1)}>
-                    -{ctrl.c.label}
-                  </button>
-                </div>
-              );
-            }
-            if (ctrl.kind === "packed") {
-              return (
-                <div class="grid grid-cols-2 gap-1 mb-1">
-                  <ControlWidget
-                    teamKey={tKey()}
-                    teamNumber={teamNumber}
-                    controlKey={ctrl.key}
-                    control={ctrl.c}
-                    team={team()}
-                    onCycle={onCycle}
-                    onToggle={onToggle}
-                    onSelect={onSelectControl}
-                  />
-                  <ControlWidget
-                    teamKey={tKey()}
-                    teamNumber={teamNumber}
-                    controlKey={ctrl.nextKey}
-                    control={ctrl.nextC}
-                    team={team()}
-                    onCycle={onCycle}
-                    onToggle={onToggle}
-                    onSelect={onSelectControl}
-                  />
-                </div>
-              );
-            }
-            return (
-              <div class="mb-1">
                 <ControlWidget
-                  teamKey={tKey()}
                   teamNumber={teamNumber}
                   controlKey={ctrl.key}
                   control={ctrl.c}
@@ -1006,16 +1022,16 @@ function TeamColumn({
                   onToggle={onToggle}
                   onSelect={onSelectControl}
                 />
-              </div>
-            );
-          }}
-        </For>
+              );
+            }}
+          </For>
+        </div>
       </div>
     );
   }
 
   return (
-    <div class="flex-1 space-y-2" id={`t${teamNumber}a`}>
+    <div class="flex-1 space-y-0" id={`t${teamNumber}a`}>
       <Name />
       <Controls />
     </div>
@@ -1023,7 +1039,6 @@ function TeamColumn({
 }
 
 interface ControlWidgetProps {
-  teamKey: string;
   teamNumber: number;
   controlKey: string;
   control: ControlDef;
@@ -1034,7 +1049,6 @@ interface ControlWidgetProps {
 }
 
 function ControlWidget({
-  teamKey: _teamKey,
   teamNumber,
   controlKey,
   control,
@@ -1045,8 +1059,9 @@ function ControlWidget({
 }: ControlWidgetProps) {
   if (control.type === "select") {
     return (
-      <div class="disp-sm bg-zinc-800">
+      <div class={DISP_SM}>
         <select
+          class="select select-sm select-ghost h-full w-full text-center"
           value={(team[controlKey] as string) || ""}
           onChange={(event) => onSelect(teamNumber, controlKey, event.target.value)}
         >
@@ -1065,8 +1080,8 @@ function ControlWidget({
     const isActive = () => team.possession === true;
     return (
       <button
-        class="btn btn-ctrl"
-        classList={{ "btn-accent": isActive(), "text-zinc-500": !isActive() }}
+        class={BTN_CTRL}
+        classList={{ "btn-warning": isActive(), "opacity-60": !isActive() }}
         onClick={() => onToggle(teamNumber)}
       >
         {control.label}
@@ -1082,8 +1097,8 @@ function ControlWidget({
     const label = () => (control.label ? `${control.label}: ${val()}` : val()) || "NONE";
     return (
       <button
-        class="btn btn-ctrl"
-        classList={{ "btn-accent": isActive() }}
+        class={BTN_CTRL}
+        classList={{ "btn-warning": isActive() }}
         onClick={() => onCycle(teamNumber, controlKey)}
       >
         {label()}

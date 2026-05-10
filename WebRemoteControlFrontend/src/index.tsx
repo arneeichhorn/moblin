@@ -3,7 +3,15 @@ import type { Accessor } from "solid-js";
 import { createStore } from "solid-js/store";
 import { render } from "solid-js/web";
 import { WebSocketConnection } from "./utils.ts";
-import { GitHubLink, Button, NamedItem, Picker, Section, Toggle } from "./components.tsx";
+import {
+  Button,
+  ConnectionBadge,
+  GitHubLink,
+  NamedItem,
+  Picker,
+  Section,
+  Toggle,
+} from "./components.tsx";
 
 interface ZoomPreset extends NamedItem {}
 
@@ -98,13 +106,13 @@ interface StatusTableProps {
 function StatusTable({ rows }: StatusTableProps) {
   return (
     <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left text-zinc-300 table-auto">
+      <table class="table table-xs">
         <tbody>
           <For each={rows()}>
             {([name, value]) => (
-              <tr class="border-b border-zinc-800">
-                <td class="py-1.5 pr-4 text-zinc-200 font-medium whitespace-nowrap">{name}</td>
-                <td class="py-1.5 text-zinc-200" innerHTML={value} />
+              <tr>
+                <td class="font-medium whitespace-nowrap">{name}</td>
+                <td innerHTML={value} />
               </tr>
             )}
           </For>
@@ -325,16 +333,16 @@ function App() {
   function Links() {
     return (
       <div class="text-center space-x-4">
-        <a href="./remote.html" class="text-indigo-400 hover:text-indigo-300 text-sm">
+        <a href="./remote.html" class="link link-primary text-sm">
           Scoreboard Control
         </a>
-        <a href="./scoreboard.html" class="text-indigo-400 hover:text-indigo-300 text-sm">
+        <a href="./scoreboard.html" class="link link-primary text-sm">
           Scoreboard Display
         </a>
-        <a href="./golf.html" class="text-indigo-400 hover:text-indigo-300 text-sm">
+        <a href="./golf.html" class="link link-primary text-sm">
           Golf Scoreboard
         </a>
-        <a href="./recordings.html" class="text-indigo-400 hover:text-indigo-300 text-sm">
+        <a href="./recordings.html" class="link link-primary text-sm">
           Recordings
         </a>
         <GitHubLink />
@@ -342,27 +350,16 @@ function App() {
     );
   }
 
-  function ConnectionStatus() {
-    return (
-      <div class="pb-1 text-center">
-        <Show when={connStatus() === "connected"}>
-          <span class="text-green-500 text-sm">Connected to server</span>
-        </Show>
-        <Show when={connStatus() === "connecting"}>
-          <span class="text-yellow-400 text-sm">Connecting to server</span>
-        </Show>
-      </div>
-    );
-  }
+  const isConnected = () => connStatus() === "connected";
 
   function Status() {
     return (
       <Section title="Status">
-        <h3 class="text-base font-medium text-zinc-300 mb-1">General</h3>
+        <h3 class="text-base font-medium opacity-80">General</h3>
         <StatusTable rows={generalRows} />
-        <h3 class="text-base font-medium text-zinc-300 mt-3 mb-1">Top left</h3>
+        <h3 class="text-base font-medium opacity-80 mt-2">Top left</h3>
         <StatusTable rows={topLeftRows} />
-        <h3 class="text-base font-medium text-zinc-300 mt-3 mb-1">Top right</h3>
+        <h3 class="text-base font-medium opacity-80 mt-2">Top right</h3>
         <StatusTable rows={topRightRows} />
       </Section>
     );
@@ -372,96 +369,85 @@ function App() {
     return (
       <Section title="Control">
         <Show when={showControl()}>
-          <div class="space-y-3">
-            <Toggle
-              id="controlLive"
-              checked={liveOn()}
-              onChange={(event) => connection.setLive(event.target.checked)}
-              label="Live"
-            />
-            <Toggle
-              id="controlRecording"
-              checked={recordingOn()}
-              onChange={(event) => connection.setRecording(event.target.checked)}
-              label="Recording"
-            />
-            <Toggle
-              id="controlMuted"
-              checked={mutedOn()}
-              onChange={(event) => connection.setMuted(event.target.checked)}
-              label="Muted"
-            />
-            <div class="flex items-center space-x-4">
-              <label class="text-sm text-zinc-200 w-24 shrink-0">Zoom</label>
-              <input
-                type="text"
-                class="bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-sm text-zinc-200 w-20"
-                placeholder="1.0"
-                value={zoomValue()}
-                onInput={(event) => setZoomValue(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") handleZoomSubmit();
-                }}
-                onBlur={handleZoomSubmit}
-              />
-            </div>
-            <Show when={zoomPresets().length > 0}>
-              <div class="flex flex-wrap gap-2">
-                <For each={zoomPresets()}>
-                  {(preset) => (
-                    <Button
-                      class={
-                        preset.id === currentZoomPresetId()
-                          ? "bg-indigo-700 text-white"
-                          : "bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                      }
-                      onClick={() => connection.setZoomPreset(preset.id)}
-                    >
-                      {preset.name}
-                    </Button>
-                  )}
-                </For>
-              </div>
-            </Show>
-            <Picker
-              name="Scene"
-              options={scenes}
-              value={currentSceneId}
-              onChange={connection.setScene}
-            />
-            <Picker
-              name="Auto scene switcher"
-              options={autoSwitchers}
-              value={currentAutoSwitcherId}
-              onChange={(value) => {
-                connection.setAutoSceneSwitcher(value === "" ? null : value);
+          <Toggle
+            id="controlLive"
+            checked={liveOn()}
+            onChange={(event) => connection.setLive(event.target.checked)}
+            label="Live"
+          />
+          <Toggle
+            id="controlRecording"
+            checked={recordingOn()}
+            onChange={(event) => connection.setRecording(event.target.checked)}
+            label="Recording"
+          />
+          <Toggle
+            id="controlMuted"
+            checked={mutedOn()}
+            onChange={(event) => connection.setMuted(event.target.checked)}
+            label="Muted"
+          />
+          <label class="flex items-center gap-3">
+            <span class="text-sm w-32 shrink-0">Zoom</span>
+            <input
+              type="text"
+              class="input input-sm input-bordered w-24"
+              placeholder="1.0"
+              value={zoomValue()}
+              onInput={(event) => setZoomValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleZoomSubmit();
               }}
+              onBlur={handleZoomSubmit}
             />
-            <Picker name="Mic" options={mics} value={currentMicId} onChange={connection.setMic} />
-            <Picker
-              name="Bitrate"
-              options={(): NamedItem[] => {
-                return bitratePresets().map(({ id, bitrate }): NamedItem => {
-                  return { id, name: bitrate > 0 ? formatBytesPerSecond(bitrate) : "Unknown" };
-                });
-              }}
-              value={currentBitrateId}
-              onChange={connection.setBitratePreset}
-            />
-            <Toggle
-              id="controlDebugLogging"
-              checked={debugLoggingOn()}
-              onChange={(event) => connection.setDebugLogging(event.target.checked)}
-              label="Debug logging"
-            />
+          </label>
+          <Show when={zoomPresets().length > 0}>
             <div class="flex flex-wrap gap-2">
-              <Button
-                class="bg-zinc-700 hover:bg-zinc-600 text-zinc-200"
-                onClick={() => connection.reloadBrowserWidgets()}
-              >
-                Reload browser widgets
-              </Button>
+              <For each={zoomPresets()}>
+                {(preset) => (
+                  <Button
+                    class={preset.id === currentZoomPresetId() ? "btn-primary" : ""}
+                    onClick={() => connection.setZoomPreset(preset.id)}
+                  >
+                    {preset.name}
+                  </Button>
+                )}
+              </For>
             </div>
+          </Show>
+          <Picker
+            name="Scene"
+            options={scenes}
+            value={currentSceneId}
+            onChange={connection.setScene}
+          />
+          <Picker
+            name="Auto scene switcher"
+            options={autoSwitchers}
+            value={currentAutoSwitcherId}
+            onChange={(value) => {
+              connection.setAutoSceneSwitcher(value === "" ? null : value);
+            }}
+          />
+          <Picker name="Mic" options={mics} value={currentMicId} onChange={connection.setMic} />
+          <Picker
+            name="Bitrate"
+            options={(): NamedItem[] => {
+              return bitratePresets().map(({ id, bitrate }): NamedItem => {
+                return { id, name: bitrate > 0 ? formatBytesPerSecond(bitrate) : "Unknown" };
+              });
+            }}
+            value={currentBitrateId}
+            onChange={connection.setBitratePreset}
+          />
+          <Toggle
+            id="controlDebugLogging"
+            checked={debugLoggingOn()}
+            onChange={(event) => connection.setDebugLogging(event.target.checked)}
+            label="Debug logging"
+          />
+          <div class="flex flex-wrap gap-2">
+            <Button onClick={() => connection.reloadBrowserWidgets()}>Reload browser widgets</Button>
           </div>
         </Show>
       </Section>
@@ -481,20 +467,18 @@ function App() {
             }}
             label="Enabled"
           />
-          <div class="space-y-2 mt-3">
-            <For each={srtPriorities}>
-              {(priority, priorityIndex) => (
-                <SrtPriorityRow
-                  priority={priority}
-                  onChange={(priorityValue, enabled) => {
-                    setSrtPriorities(priorityIndex(), "priority", priorityValue);
-                    setSrtPriorities(priorityIndex(), "enabled", enabled);
-                    connection.setSrtConnectionPriority(priority.id, priorityValue, enabled);
-                  }}
-                />
-              )}
-            </For>
-          </div>
+          <For each={srtPriorities}>
+            {(priority, priorityIndex) => (
+              <SrtPriorityRow
+                priority={priority}
+                onChange={(priorityValue, enabled) => {
+                  setSrtPriorities(priorityIndex(), "priority", priorityValue);
+                  setSrtPriorities(priorityIndex(), "enabled", enabled);
+                  connection.setSrtConnectionPriority(priority.id, priorityValue, enabled);
+                }}
+              />
+            )}
+          </For>
         </Section>
       </Show>
     );
@@ -507,10 +491,7 @@ function App() {
           <div class="flex flex-wrap gap-2">
             <For each={gimbalPresets()}>
               {(preset) => (
-                <Button
-                  class="bg-zinc-700 hover:bg-zinc-600 text-zinc-200 px-4 py-2"
-                  onClick={() => connection.moveToGimbalPreset(preset.id)}
-                >
+                <Button onClick={() => connection.moveToGimbalPreset(preset.id)}>
                   {preset.name}
                 </Button>
               )}
@@ -525,21 +506,19 @@ function App() {
     return (
       <Show when={showFilters()}>
         <Section title="Filters">
-          <div class="space-y-3">
-            <For each={allFilterKeys}>
-              {(key) => (
-                <Toggle
-                  id={`filter_${key}`}
-                  checked={filterStates[key] || false}
-                  onChange={(event) => {
-                    setFilterStates(key, event.target.checked);
-                    connection.setFilter(key, event.target.checked);
-                  }}
-                  label={filterNames[key as keyof typeof filterNames] || key}
-                />
-              )}
-            </For>
-          </div>
+          <For each={allFilterKeys}>
+            {(key) => (
+              <Toggle
+                id={`filter_${key}`}
+                checked={filterStates[key] || false}
+                onChange={(event) => {
+                  setFilterStates(key, event.target.checked);
+                  connection.setFilter(key, event.target.checked);
+                }}
+                label={filterNames[key as keyof typeof filterNames] || key}
+              />
+            )}
+          </For>
         </Section>
       </Show>
     );
@@ -552,17 +531,17 @@ function App() {
           ref={(el: HTMLDivElement) => {
             logContainer = el;
           }}
-          class="overflow-y-auto h-96 text-sm text-zinc-300"
+          class="overflow-y-auto h-96 text-sm font-mono"
         />
       </Section>
     );
   }
 
   return (
-    <div class="max-w-3xl mx-auto space-y-2">
+    <div class="max-w-3xl mx-auto space-y-3">
       <h1 class="text-2xl font-bold text-center">Moblin Remote Control</h1>
       <Links />
-      <ConnectionStatus />
+      <ConnectionBadge connected={isConnected} />
       <Status />
       <Control />
       <SrtConnectionPriorities />
@@ -583,12 +562,12 @@ function SrtPriorityRow({ priority, onChange }: SrtPriorityRowProps) {
   const [checked, setChecked] = createSignal(priority.enabled);
 
   return (
-    <div class="flex items-center space-x-3">
-      <label class="text-sm text-zinc-200 w-24 shrink-0">{priority.name}</label>
+    <div class="flex items-center gap-3">
+      <span class="text-sm w-24 shrink-0">{priority.name}</span>
       <input
         type="checkbox"
         checked={checked()}
-        class="w-4 h-4 bg-zinc-800 border border-zinc-600 rounded cursor-pointer accent-indigo-600"
+        class="checkbox checkbox-sm checkbox-primary"
         onChange={(event) => {
           setChecked(event.target.checked);
           onChange(sliderValue(), event.target.checked);
@@ -599,11 +578,11 @@ function SrtPriorityRow({ priority, onChange }: SrtPriorityRowProps) {
         min="1"
         max="10"
         value={sliderValue()}
-        class="flex-1 accent-indigo-600"
+        class="range range-xs range-primary flex-1"
         onInput={(event) => setSliderValue(parseInt(event.target.value))}
         onChange={(event) => onChange(parseInt(event.target.value), checked())}
       />
-      <span class="text-sm text-zinc-300 w-6 text-right">{sliderValue()}</span>
+      <span class="text-sm w-6 text-right tabular-nums">{sliderValue()}</span>
     </div>
   );
 }

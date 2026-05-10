@@ -1,7 +1,7 @@
 import { createSignal, For, Show, onMount } from "solid-js";
 import { render } from "solid-js/web";
 import { showConfirm, confirmOk, confirmCancel } from "./utils.ts";
-import { BasicLinks, ConfirmDialog } from "./components.tsx";
+import { BasicLinks, ConfirmDialog, Section } from "./components.tsx";
 
 interface Recording {
   name: string;
@@ -105,10 +105,10 @@ function HoverPreview(): HoverPreviewHandle {
         ref={(el: HTMLDivElement) => {
           previewEl = el;
         }}
-        class="thumbnail-preview"
+        class="fixed z-50 pointer-events-none max-w-[min(80vw,640px)] max-h-[80vh] overflow-hidden"
         style={{ display: "none" }}
       >
-        <img />
+        <img class="block max-w-full max-h-[80vh] object-contain" />
       </div>
     ) as HTMLDivElement,
   };
@@ -157,10 +157,10 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
   }
 
   return (
-    <div class="recording-row">
-      <div class="recording-header">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-md hover:bg-base-300/40">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
         <img
-          class="recording-thumbnail"
+          class="w-20 max-h-20 object-contain shrink-0 cursor-pointer rounded"
           src={src}
           alt=""
           onMouseEnter={hasHoverPreview() ? (event) => hoverPreview.show(src, event) : undefined}
@@ -168,13 +168,13 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
           onMouseLeave={hasHoverPreview() ? () => hoverPreview.hide() : undefined}
           onClick={handleThumbnailClick}
         />
-        <span class="recording-name">{recording.name}</span>
+        <span class="flex-1 min-w-0 text-sm break-words sm:truncate">{recording.name}</span>
       </div>
-      <div class="recording-footer">
-        <span class="recording-size">{recording.size}</span>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-xs opacity-60 whitespace-nowrap">{recording.size}</span>
         <button
           type="button"
-          class="recording-share-button"
+          class="btn btn-xs"
           aria-label={`Copy download link for ${recording.name}`}
           onClick={handleCopy}
         >
@@ -182,7 +182,7 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         </button>
         <button
           type="button"
-          class="recording-download-button"
+          class="btn btn-xs"
           aria-label={`Download ${recording.name}`}
           onClick={handleDownload}
         >
@@ -190,7 +190,7 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         </button>
         <button
           type="button"
-          class="recording-delete-button"
+          class="btn btn-xs btn-error btn-outline"
           aria-label={`Delete ${recording.name}`}
           onClick={handleDelete}
         >
@@ -241,16 +241,35 @@ function App() {
 
   onMount(loadRecordings);
 
-  function Recordings() {
+  function MobilePreview() {
     return (
-      <div class="bg-zinc-900 border border-zinc-700 rounded-lg p-2">
+      <Show when={mobilePreviewSrc() !== null}>
+        <div
+          class="fixed inset-0 z-[1100] flex items-center justify-center p-4 bg-black/90"
+          onClick={() => setMobilePreviewSrc(null)}
+        >
+          <img
+            class="block max-w-full max-h-full object-contain"
+            src={mobilePreviewSrc() ?? undefined}
+            alt=""
+          />
+        </div>
+      </Show>
+    );
+  }
+
+  return (
+    <div class="max-w-3xl mx-auto space-y-3">
+      <h1 class="text-2xl font-bold text-center">Moblin Recordings</h1>
+      <BasicLinks />
+      <Section title="Recordings">
         <Show when={loading()}>
-          <div class="text-sm text-zinc-500 text-center">
+          <div class="text-sm opacity-60 text-center py-2">
             {loadError() ? "Failed to load recordings." : "Loading..."}
           </div>
         </Show>
         <Show when={!loading() && recordings().length === 0}>
-          <div class="text-sm text-zinc-500 text-center">No recordings found.</div>
+          <div class="text-sm opacity-60 text-center py-2">No recordings found.</div>
         </Show>
         <For each={recordings()}>
           {(recording) => (
@@ -262,37 +281,17 @@ function App() {
             />
           )}
         </For>
-      </div>
-    );
-  }
-
-  function MobliePreview() {
-    return (
-      <Show when={mobilePreviewSrc() !== null}>
-        <div class="mobile-preview" aria-hidden="false" onClick={() => setMobilePreviewSrc(null)}>
-          <div class="mobile-preview-backdrop">
-            <img class="mobile-preview-image" src={mobilePreviewSrc() ?? undefined} alt="" />
-          </div>
-        </div>
-      </Show>
-    );
-  }
-
-  return (
-    <div class="max-w-3xl mx-auto space-y-2">
-      <h1 class="text-2xl font-bold text-center">Moblin Recordings</h1>
-      <BasicLinks />
-      <Recordings />
+      </Section>
       {hoverPreview.element}
       <ConfirmDialog
         open={confirmOpen}
         message={confirmMessage}
         onOk={confirmOk}
         onCancel={confirmCancel}
-        okTextClass="text-red-400"
+        okClass="btn-error"
         okLabel="Delete"
       />
-      <MobliePreview />
+      <MobilePreview />
     </div>
   );
 }

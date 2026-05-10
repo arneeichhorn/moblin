@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "daisyui": "^5.0.0",
     "solid-js": "^1.9.5",
     "tailwind-merge": "^3.5.0"
   },
