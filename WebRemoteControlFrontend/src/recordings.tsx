@@ -170,11 +170,11 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         />
         <span class="flex-1 min-w-0 text-sm break-words sm:truncate">{recording.name}</span>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
+      <div class="flex items-center gap-1 sm:gap-2 shrink-0">
         <span class="text-xs opacity-60 whitespace-nowrap">{recording.size}</span>
         <button
           type="button"
-          class="btn btn-xs"
+          class="btn btn-xs btn-neutral"
           aria-label={`Copy download link for ${recording.name}`}
           onClick={handleCopy}
         >
@@ -182,7 +182,7 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         </button>
         <button
           type="button"
-          class="btn btn-xs"
+          class="btn btn-xs btn-neutral"
           aria-label={`Download ${recording.name}`}
           onClick={handleDownload}
         >
