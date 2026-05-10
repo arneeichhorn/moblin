@@ -10,12 +10,16 @@ interface ButtonProps {
   children?: JSX.Element;
 }
 
+const BTN_VARIANT_RE =
+  /\bbtn-(primary|secondary|accent|info|success|warning|error|neutral|ghost|link|outline|soft|dash)\b/;
+
 export function Button({ class: extraClass, type = "button", disabled, onClick, children }: ButtonProps) {
+  const hasVariant = extraClass !== undefined && BTN_VARIANT_RE.test(extraClass);
   return (
     <button
       type={type}
       disabled={disabled}
-      class={twMerge("btn btn-sm", extraClass)}
+      class={twMerge("btn btn-sm", hasVariant ? "" : "btn-neutral", extraClass)}
       onClick={onClick}
     >
       {children}
@@ -43,7 +47,7 @@ export function ConfirmDialog({
   return (
     <Show when={open()}>
       <dialog open class="modal modal-open">
-        <div class="modal-box max-w-sm">
+        <div class="modal-box max-w-sm bg-base-300 border border-neutral shadow-2xl">
           <p>{message()}</p>
           <div class="modal-action">
             <button type="button" class="btn btn-sm btn-ghost" onClick={onCancel}>
@@ -54,7 +58,7 @@ export function ConfirmDialog({
             </button>
           </div>
         </div>
-        <div class="modal-backdrop" onClick={onCancel} />
+        <div class="modal-backdrop bg-black/70" onClick={onCancel} />
       </dialog>
     </Show>
   );

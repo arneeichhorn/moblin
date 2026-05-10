@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @plugin "daisyui" {
   themes: false;
+  logs: false;
 }
 @plugin "daisyui/theme" {
   name: "moblin";

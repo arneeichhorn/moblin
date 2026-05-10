@@ -299,7 +299,7 @@ function App() {
       <Section title="Players">
         <div class="flex justify-end gap-1">
           <button
-            class="btn btn-xs"
+            class="btn btn-xs btn-neutral"
             disabled={state.players.length <= 1}
             onClick={removePlayer}
           >
@@ -345,11 +345,11 @@ function App() {
                 const isActive = () => holeIndex === state.currentHole;
                 return (
                   <button
-                    class="btn btn-xs btn-square"
+                    class="btn btn-xs btn-square btn-neutral"
                     classList={{
                       "btn-success": isActive(),
                       "btn-outline btn-success": !isActive() && allScored(),
-                      "btn-outline btn-neutral": !isActive() && !allScored() && anyScored(),
+                      "btn-outline": !isActive() && !allScored() && anyScored(),
                     }}
                     onClick={() => selectHole(holeIndex)}
                   >

@@ -677,7 +677,7 @@ function App() {
   function NewSetMatch() {
     return (
       <div class="grid grid-cols-2 gap-2">
-        <button class={BTN_CTRL} onClick={nextSet}>
+        <button class={`${BTN_CTRL} btn-neutral`} onClick={nextSet}>
           {scoreboardState.global.scoringMode === "tennis" ? "Start next set" : "Next set/period"}
         </button>
         <button class={`${BTN_CTRL} btn-error btn-outline`} onClick={newMatch}>
@@ -758,21 +758,30 @@ function App() {
             />
             <button
               class={BTN_TOP}
-              classList={{ "btn-warning": scoreboardState.global.showTitle }}
+              classList={{
+                "btn-warning": scoreboardState.global.showTitle,
+                "btn-neutral": !scoreboardState.global.showTitle,
+              }}
               onClick={() => toggleGlobal("showTitle")}
             >
               Title
             </button>
             <button
               class={BTN_TOP}
-              classList={{ "btn-warning": scoreboardState.global.showMoreStats }}
+              classList={{
+                "btn-warning": scoreboardState.global.showMoreStats,
+                "btn-neutral": !scoreboardState.global.showMoreStats,
+              }}
               onClick={() => toggleGlobal("showMoreStats")}
             >
               More stats
             </button>
             <button
               class={BTN_TOP}
-              classList={{ "btn-warning": scoreboardState.global.showStats }}
+              classList={{
+                "btn-warning": scoreboardState.global.showStats,
+                "btn-neutral": !scoreboardState.global.showStats,
+              }}
               onClick={() => toggleGlobal("showStats")}
             >
               Info box
@@ -793,7 +802,10 @@ function App() {
             />
             <button
               class={BTN_TOP}
-              classList={{ "btn-warning": scoreboardState.global.showClock }}
+              classList={{
+                "btn-warning": scoreboardState.global.showClock,
+                "btn-neutral": !scoreboardState.global.showClock,
+              }}
               onClick={() => toggleGlobal("showClock")}
             >
               Clock
@@ -979,10 +991,16 @@ function TeamColumn({
               if (ctrl.kind === "counter") {
                 return (
                   <div class="grid grid-cols-2 gap-1">
-                    <button class={BTN_CTRL} onClick={() => onAdjust(teamNumber, ctrl.key, 1)}>
+                    <button
+                      class={`${BTN_CTRL} btn-neutral`}
+                      onClick={() => onAdjust(teamNumber, ctrl.key, 1)}
+                    >
                       +{ctrl.c.label}
                     </button>
-                    <button class={BTN_CTRL} onClick={() => onAdjust(teamNumber, ctrl.key, -1)}>
+                    <button
+                      class={`${BTN_CTRL} btn-neutral`}
+                      onClick={() => onAdjust(teamNumber, ctrl.key, -1)}
+                    >
                       -{ctrl.c.label}
                     </button>
                   </div>
@@ -1081,7 +1099,10 @@ function ControlWidget({
     return (
       <button
         class={BTN_CTRL}
-        classList={{ "btn-warning": isActive(), "opacity-60": !isActive() }}
+        classList={{
+          "btn-warning": isActive(),
+          "btn-neutral opacity-60": !isActive(),
+        }}
         onClick={() => onToggle(teamNumber)}
       >
         {control.label}
@@ -1098,7 +1119,7 @@ function ControlWidget({
     return (
       <button
         class={BTN_CTRL}
-        classList={{ "btn-warning": isActive() }}
+        classList={{ "btn-warning": isActive(), "btn-neutral": !isActive() }}
         onClick={() => onCycle(teamNumber, controlKey)}
       >
         {label()}
