@@ -553,7 +553,7 @@ function App() {
 
   function Team() {
     return (
-      <div class="flex gap-2" classList={{ "opacity-30 pointer-events-none": !connected() }}>
+      <div class="flex gap-1 sm:gap-2" classList={{ "opacity-30 pointer-events-none": !connected() }}>
         <For each={[1, 2]}>
           {(teamNumber) => (
             <TeamColumn
@@ -940,7 +940,7 @@ function TeamColumn({
   function Controls() {
     return (
       <div class="card bg-base-200 border border-base-300 rounded-t-none">
-        <div class="card-body p-2 gap-2">
+        <div class="card-body p-1 sm:p-2 gap-1 sm:gap-2">
           <div class="grid grid-cols-4 gap-1 h-10">
             <div class={DISP_BOX} style={{ background: team().bgColor, color: team().textColor }}>
               {team().primaryScore}

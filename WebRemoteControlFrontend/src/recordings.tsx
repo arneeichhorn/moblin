@@ -157,10 +157,10 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
   }
 
   return (
-    <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-2 rounded-md hover:bg-base-300/40">
-      <div class="flex items-center gap-3 min-w-0 flex-1">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 p-1 sm:p-2 rounded-md hover:bg-base-300/40">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         <img
-          class="w-20 max-h-20 object-contain shrink-0 cursor-pointer rounded"
+          class="w-16 sm:w-20 max-h-16 sm:max-h-20 object-contain shrink-0 cursor-pointer rounded"
           src={src}
           alt=""
           onMouseEnter={hasHoverPreview() ? (event) => hoverPreview.show(src, event) : undefined}
@@ -259,8 +259,8 @@ function App() {
   }
 
   return (
-    <div class="max-w-3xl mx-auto space-y-3">
-      <h1 class="text-2xl font-bold text-center">Moblin Recordings</h1>
+    <div class="max-w-3xl mx-auto space-y-2 sm:space-y-3">
+      <h1 class="text-xl sm:text-2xl font-bold text-center">Moblin Recordings</h1>
       <BasicLinks />
       <Section title="Recordings">
         <Show when={loading()}>

@@ -532,8 +532,8 @@ function App() {
   }
 
   return (
-    <div class="max-w-3xl mx-auto space-y-3">
-      <h1 class="text-2xl font-bold text-center">Moblin Golf Scoreboard</h1>
+    <div class="max-w-3xl mx-auto space-y-2 sm:space-y-3">
+      <h1 class="text-xl sm:text-2xl font-bold text-center">Moblin Golf Scoreboard</h1>
       <BasicLinks />
       <ConnectionRow />
       <Event />

@@ -67,8 +67,8 @@ export function ConfirmDialog({
 export function Section(props: ParentProps<{ title: string }>) {
   return (
     <div class="card bg-base-200 border border-base-300">
-      <div class="card-body p-3 gap-3">
-        <h2 class="card-title text-lg">{props.title}</h2>
+      <div class="card-body p-2 sm:p-3 gap-2 sm:gap-3">
+        <h2 class="card-title text-base sm:text-lg">{props.title}</h2>
         {props.children}
       </div>
     </div>
@@ -115,8 +115,8 @@ export interface PickerProps {
 export function Picker({ name, options, value, onChange }: PickerProps) {
   return (
     <Show when={options().length > 0}>
-      <label class="flex items-center gap-3">
-        <span class="text-sm w-32 shrink-0">{name}</span>
+      <label class="flex items-center gap-2 sm:gap-3">
+        <span class="text-sm w-24 sm:w-32 shrink-0">{name}</span>
         <select
           class="select select-sm select-bordered flex-1"
           value={value()}
@@ -140,11 +140,11 @@ export interface ToggleProps {
 
 export function Toggle(props: ToggleProps) {
   return (
-    <label for={props.id} class="flex items-center gap-3 cursor-pointer">
+    <label for={props.id} class="flex items-center gap-2 sm:gap-3 cursor-pointer">
       <input
         id={props.id}
         type="checkbox"
-        class="toggle toggle-primary"
+        class="toggle toggle-sm sm:toggle-md toggle-primary"
         checked={props.checked}
         role="switch"
         onChange={props.onChange}

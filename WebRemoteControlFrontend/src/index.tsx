@@ -387,8 +387,8 @@ function App() {
             onChange={(event) => connection.setMuted(event.target.checked)}
             label="Muted"
           />
-          <label class="flex items-center gap-3">
-            <span class="text-sm w-32 shrink-0">Zoom</span>
+          <label class="flex items-center gap-2 sm:gap-3">
+            <span class="text-sm w-24 sm:w-32 shrink-0">Zoom</span>
             <input
               type="text"
               class="input input-sm input-bordered w-24"
@@ -538,8 +538,8 @@ function App() {
   }
 
   return (
-    <div class="max-w-3xl mx-auto space-y-3">
-      <h1 class="text-2xl font-bold text-center">Moblin Remote Control</h1>
+    <div class="max-w-3xl mx-auto space-y-2 sm:space-y-3">
+      <h1 class="text-xl sm:text-2xl font-bold text-center">Moblin Remote Control</h1>
       <Links />
       <ConnectionBadge connected={isConnected} />
       <Status />
@@ -562,8 +562,8 @@ function SrtPriorityRow({ priority, onChange }: SrtPriorityRowProps) {
   const [checked, setChecked] = createSignal(priority.enabled);
 
   return (
-    <div class="flex items-center gap-3">
-      <span class="text-sm w-24 shrink-0">{priority.name}</span>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <span class="text-sm w-20 sm:w-24 shrink-0">{priority.name}</span>
       <input
         type="checkbox"
         checked={checked()}
