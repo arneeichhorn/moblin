@@ -19,7 +19,7 @@ export function Button({ class: extraClass, type = "button", disabled, onClick, 
     <button
       type={type}
       disabled={disabled}
-      class={twMerge("btn btn-sm", hasVariant ? "" : "btn-neutral", extraClass)}
+      class={twMerge("btn btn-sm", hasVariant ? "" : "btn-outline", extraClass)}
       onClick={onClick}
     >
       {children}

@@ -174,7 +174,7 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         <span class="text-xs opacity-60 whitespace-nowrap">{recording.size}</span>
         <button
           type="button"
-          class="btn btn-xs btn-neutral"
+          class="btn btn-xs btn-outline"
           aria-label={`Copy download link for ${recording.name}`}
           onClick={handleCopy}
         >
@@ -182,7 +182,7 @@ function RecordingRow({ recording, onDelete, onMobilePreview, hoverPreview }: Re
         </button>
         <button
           type="button"
-          class="btn btn-xs btn-neutral"
+          class="btn btn-xs btn-outline"
           aria-label={`Download ${recording.name}`}
           onClick={handleDownload}
         >

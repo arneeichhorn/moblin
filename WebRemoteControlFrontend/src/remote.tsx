@@ -677,7 +677,7 @@ function App() {
   function NewSetMatch() {
     return (
       <div class="grid grid-cols-2 gap-2">
-        <button class={`${BTN_CTRL} btn-neutral`} onClick={nextSet}>
+        <button class={`${BTN_CTRL} btn-outline`} onClick={nextSet}>
           {scoreboardState.global.scoringMode === "tennis" ? "Start next set" : "Next set/period"}
         </button>
         <button class={`${BTN_CTRL} btn-error btn-outline`} onClick={newMatch}>
@@ -760,7 +760,7 @@ function App() {
               class={BTN_TOP}
               classList={{
                 "btn-warning": scoreboardState.global.showTitle,
-                "btn-neutral": !scoreboardState.global.showTitle,
+                "btn-outline": !scoreboardState.global.showTitle,
               }}
               onClick={() => toggleGlobal("showTitle")}
             >
@@ -770,7 +770,7 @@ function App() {
               class={BTN_TOP}
               classList={{
                 "btn-warning": scoreboardState.global.showMoreStats,
-                "btn-neutral": !scoreboardState.global.showMoreStats,
+                "btn-outline": !scoreboardState.global.showMoreStats,
               }}
               onClick={() => toggleGlobal("showMoreStats")}
             >
@@ -780,7 +780,7 @@ function App() {
               class={BTN_TOP}
               classList={{
                 "btn-warning": scoreboardState.global.showStats,
-                "btn-neutral": !scoreboardState.global.showStats,
+                "btn-outline": !scoreboardState.global.showStats,
               }}
               onClick={() => toggleGlobal("showStats")}
             >
@@ -804,7 +804,7 @@ function App() {
               class={BTN_TOP}
               classList={{
                 "btn-warning": scoreboardState.global.showClock,
-                "btn-neutral": !scoreboardState.global.showClock,
+                "btn-outline": !scoreboardState.global.showClock,
               }}
               onClick={() => toggleGlobal("showClock")}
             >
@@ -992,13 +992,13 @@ function TeamColumn({
                 return (
                   <div class="grid grid-cols-2 gap-1">
                     <button
-                      class={`${BTN_CTRL} btn-neutral`}
+                      class={`${BTN_CTRL} btn-outline`}
                       onClick={() => onAdjust(teamNumber, ctrl.key, 1)}
                     >
                       +{ctrl.c.label}
                     </button>
                     <button
-                      class={`${BTN_CTRL} btn-neutral`}
+                      class={`${BTN_CTRL} btn-outline`}
                       onClick={() => onAdjust(teamNumber, ctrl.key, -1)}
                     >
                       -{ctrl.c.label}
@@ -1101,7 +1101,7 @@ function ControlWidget({
         class={BTN_CTRL}
         classList={{
           "btn-warning": isActive(),
-          "btn-neutral opacity-60": !isActive(),
+          "btn-outline opacity-60": !isActive(),
         }}
         onClick={() => onToggle(teamNumber)}
       >
@@ -1119,7 +1119,7 @@ function ControlWidget({
     return (
       <button
         class={BTN_CTRL}
-        classList={{ "btn-warning": isActive(), "btn-neutral": !isActive() }}
+        classList={{ "btn-warning": isActive(), "btn-outline": !isActive() }}
         onClick={() => onCycle(teamNumber, controlKey)}
       >
         {label()}
